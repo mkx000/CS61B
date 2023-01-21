@@ -1,4 +1,4 @@
-
+import java.util.ArrayList;
 
 public class NBody{
 	public static void main(String[] args){
@@ -9,10 +9,6 @@ public class NBody{
 
 		double radius = readRadius(filename);
 		Planet[] planets = readPlanets(filename);
-		for (int i = 0; i < planets.length; i++){
-			planets[i].imgFileName = "./images/" + planets[i].imgFileName;
-		}
-
 
 		String imagePath = "images/starfield.jpg";	
 
@@ -57,28 +53,52 @@ public class NBody{
 
 	public static Planet[] readPlanets(String file){
 		In in = new In(file);
-		in.readInt();
+
+		//if (!in.isEmpty())
+		//	System.out.println("in is not empty");
+
+		int numOfplanets = in.readInt();
+		//System.out.println(in.readDouble());
 		in.readDouble();
 
-		Planet[] Bodies = new Planet[5];
-		for (int i = 0; i < 5; i++){
+		Planet[] planets = new Planet[numOfplanets];
+		for (int i = 0; i < numOfplanets ; i++){
+			double xpos, ypos, xvel, yvel, mass;
+			xpos = in.readDouble();
+			ypos = in.readDouble();
+			xvel = in.readDouble();
+			yvel = in.readDouble();
+			mass = in.readDouble();
+			
+			String img = in.readString();
+			//planets[i] = new planet(xpos, ypos, xvel, yvel, mass, "./images/" + img); 
+			planets[i] = new Planet(xpos, ypos, xvel, yvel, mass, "./images/" + img); 
+
+			//system.out.println(img);
+			//system.out.println(planets[i].imgfilename);
+
+		}
+		return planets;
+			
+		/*arraylist<planet> bodies = new arraylist<planet>();
+
+		if (!in.isEmpty())
+			System.out.println("in is not empty");
+
+		for (int i = 0; i < numOfplanets; i++){
 			double xPos, yPos, xVel, yVel, mass;
 			xPos = in.readDouble();
 			yPos = in.readDouble();
 			xVel = in.readDouble();
 			yVel = in.readDouble();
 			mass = in.readDouble();
-
+			
 			String img = in.readString();
-			Bodies[i] = new Planet(xPos, yPos, xVel, yVel, mass, img);
-
-			//System.out.println(Bodies[i].imgFileName);
-			//System.out.println(img);
-			//System.out.println(Bodies[i].xxPos);
+			//Planet planet = new Planet(xPos, yPos, xVel, yVel, mass, "./images/" + img); 
+			Planet planet = new Planet(xPos, yPos, xVel, yVel, mass, img); 
+			Bodies.add(planet);
 		}
-
-		return Bodies;
-
+		return (Planet [])Bodies.toArray();*/
 	}	
 }
 

@@ -3,9 +3,9 @@ import java.lang.Math;
 public class Planet{
 
 	public double xxPos, yyPos, xxVel, yyVel, mass;
-	String imgFileName;
+	public String imgFileName;
 	
-	static final double G = 6.67E-11;
+	private static final double G = 6.67E-11;
 	public Planet(double xP, double yP, double xV, double yV, double m, String img){
 		xxPos = xP;
 		yyPos = yP;
@@ -15,14 +15,14 @@ public class Planet{
 		imgFileName = img;
 	}
 
-	public Planet(Planet b){
+	/*public Planet(Planet b){
 		xxPos = b.xxPos;
 		yyPos = b.yyPos;
 		xxVel = b.xxVel;
 		yyVel = b.yyVel;
 		mass = b.mass;
 		imgFileName = b.imgFileName;
-	}
+	}*/
 
 	public void draw(){
 		StdDraw.picture(xxPos, yyPos, imgFileName);
