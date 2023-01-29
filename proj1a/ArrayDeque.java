@@ -27,8 +27,9 @@ public class ArrayDeque<T> {
     }
 
     public void addFirst(T item) {
-        if (2 * this.logicalSize >= this.actualSize)
+        if (2 * this.logicalSize >= this.actualSize){
             this.bigger();
+        }
 
         this.array.arr[this.head] = item;
         int pos = (this.head - 1 + this.actualSize) % this.actualSize;
@@ -37,8 +38,9 @@ public class ArrayDeque<T> {
     }
 
     public void addLast(T item) {
-        if (2 * this.logicalSize >= this.actualSize)
+        if (2 * this.logicalSize >= this.actualSize){
             this.bigger();
+        }
 
         this.array.arr[this.tail] = item;
         int pos = (this.tail + 1) % this.actualSize;
@@ -57,49 +59,55 @@ public class ArrayDeque<T> {
     public void printDeque() {
         int pos = this.head + 1;
         for (int i = 0; i < this.logicalSize; i++) {
-            if (i != 0)
+            if (i != 0){
                 System.out.print(" ");
+            }
             System.out.print(this.array.arr[pos]);
             pos = (pos + 1) % this.logicalSize;
         }
     }
 
     public T removeFirst() {
-        if (this.isEmpty())
+        if (this.isEmpty()){
             return null;
-        if (this.actualSize > 2 * ArrayDeque.initialSize && 4 * this.logicalSize <= this.actualSize)
+        }
+        if (this.actualSize > 2 * ArrayDeque.initialSize && 4 * this.logicalSize <= this.actualSize){
             this.smaller();
+        }
         this.logicalSize--;
         this.head = (this.head + 1) % this.actualSize;
         return this.array.arr[this.head];
     }
 
     public T removeLast() {
-        if (this.isEmpty())
+        if (this.isEmpty()){
             return null;
-        if (this.actualSize > 2 * ArrayDeque.initialSize && 4 * this.logicalSize <= this.actualSize)
+        }
+        if (this.actualSize > 2 * ArrayDeque.initialSize && 4 * this.logicalSize <= this.actualSize){
             this.smaller();
+        }
         this.logicalSize--;
         this.tail = (this.tail - 1 + this.actualSize) % this.actualSize;
         return this.array.arr[this.tail];
     }
 
     public T get(int index) {
-        if (index < 0 || index > this.logicalSize - 1)
+        if (index < 0 || index > this.logicalSize - 1){
             return null;
+        }
         int pos = (this.head + 1 + index) % this.actualSize;
         return this.array.arr[pos];
     }
 
     private void bigger() {
-        int num = this.actualSize;
+        int num = this.logicalSize;
         int pos = (this.head + 1) % this.actualSize;
         Array old = this.array;
         this.array = new Array(2 * this.actualSize);
 
         for (int i = 0; i < num; i++) {
             this.array.arr[i + 1] = old.arr[pos];
-            pos = (pos + 1) % num;
+            pos = (pos + 1) % this.actualSize;
         }
 
         this.actualSize *= 2;
@@ -108,14 +116,14 @@ public class ArrayDeque<T> {
     }
 
     private void smaller() {
-        int num = this.actualSize;
+        int num = this.logicalSize;
         int pos = (this.head + 1) % this.actualSize;
         Array old = this.array;
         this.array = new Array(this.actualSize / 2);
 
         for (int i = 0; i < num; i++) {
             this.array.arr[i + 1] = old.arr[pos];
-            pos = (pos + 1) % num;
+            pos = (pos + 1) % this.actualSize;
         }
         this.actualSize /= 2;
         this.head = 0;
