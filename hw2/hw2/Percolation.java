@@ -1,10 +1,8 @@
 package hw2;
 
 import java.io.File;
-import java.lang.Exception;
 
 import edu.princeton.cs.algs4.In;
-import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
@@ -22,7 +20,7 @@ public class Percolation {
         }
         uf = new WeightedQuickUnionUF(N * N);
         size = N;
-        openCnt = N * N;
+        openCnt = 0;
         isPercolate = false;
         grid = new int[N][N];
         for (int i = 0; i < N; i++) {
@@ -101,7 +99,7 @@ public class Percolation {
         return isPercolate;
     }
 
-    /*public static void main(String[] args) {
+    public static void main(String[] args) {
         String path = "inputFiles/";
         File file = new File("/home/mkx/courses/cs61/cs61b/sp18/hw2/inputFiles");
         File[] files = file.listFiles();
@@ -133,5 +131,5 @@ public class Percolation {
         }
 
         System.out.println("ends");
-    }*/
+    }
 }

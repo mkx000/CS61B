@@ -3,8 +3,6 @@ package hw2;
 import edu.princeton.cs.algs4.StdRandom;
 import edu.princeton.cs.algs4.StdStats;
 
-import java.util.Map;
-
 public class PercolationStats {
     private double mean;
     private double stddev;
@@ -24,7 +22,7 @@ public class PercolationStats {
             StdRandom.setSeed(SEED++);
             Percolation per = pf.make(N);
             int threshold = 0;
-            while (!per.percolates()) {
+            while (true) {
                 int row = StdRandom.uniform(N);
                 int col = StdRandom.uniform(N);
                 if (per.isOpen(row, col))
@@ -34,11 +32,12 @@ public class PercolationStats {
                 if (per.percolates())
                     break;
             }
-            thresholds[i] = threshold;
+            thresholds[i] = (double) threshold /( N * N);
         }
 
+
         mean = StdStats.mean(thresholds);
-        stddev = StdStats.stddev(thresholds);
+        stddev = StdStats.stddev(thresholds) ;
         conLow = mean - PercolationStats.E * stddev / Math.sqrt(T);
         conHigh = mean + PercolationStats.E * stddev / Math.sqrt(T);
     }
@@ -60,9 +59,9 @@ public class PercolationStats {
         return conHigh;
     }
 
-   /* public static void main(String[] args) {
+    public static void main(String[] args) {
         PercolationFactory pf = new PercolationFactory();
-        PercolationStats pt = new PercolationStats(30, 10, pf);
+        PercolationStats pt = new PercolationStats(200, 10, pf);
         System.out.println(pt.mean + " " + pt.stddev + " " + pt.conHigh + " " + pt.conLow);
-    } */
+    }
 }
