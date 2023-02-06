@@ -101,7 +101,7 @@ public class Percolation {
         return isPercolate;
     }
 
-    public static void main(String[] args) {
+    /*public static void main(String[] args) {
         String path = "inputFiles/";
         File file = new File("/home/mkx/courses/cs61/cs61b/sp18/hw2/inputFiles");
         File[] files = file.listFiles();
@@ -133,5 +133,5 @@ public class Percolation {
         }
 
         System.out.println("ends");
-    }
+    }*/
 }

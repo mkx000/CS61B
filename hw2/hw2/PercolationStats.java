@@ -60,9 +60,9 @@ public class PercolationStats {
         return conHigh;
     }
 
-    public static void main(String[] args) {
+   /* public static void main(String[] args) {
         PercolationFactory pf = new PercolationFactory();
         PercolationStats pt = new PercolationStats(30, 10, pf);
         System.out.println(pt.mean + " " + pt.stddev + " " + pt.conHigh + " " + pt.conLow);
-    }
+    } */
 }
