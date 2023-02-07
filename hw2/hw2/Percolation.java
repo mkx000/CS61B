@@ -7,6 +7,9 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
 public class Percolation {
     private WeightedQuickUnionUF uf;
+
+    private WeightedQuickUnionUF topUf, bottomUf;
+    private int topNode, bottomNode;
     private int[][] grid; //0 == blocked 1 == open
     private int size;
     private int openCnt;
@@ -14,11 +17,15 @@ public class Percolation {
 
     private static int[][] dir = new int[][]{{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
 
+
     public Percolation(int N) throws IllegalArgumentException {
         if (N <= 0) {
             throw new IllegalArgumentException("N <= 0");
         }
-        uf = new WeightedQuickUnionUF(N * N);
+        topUf = new WeightedQuickUnionUF(N * N + 2);
+        bottomUf = new WeightedQuickUnionUF(N * N + 2);
+        topNode = N * N;
+        bottomNode = N * N + 1;
         size = N;
         openCnt = 0;
         isPercolate = false;
@@ -28,6 +35,7 @@ public class Percolation {
                 grid[i][j] = 0;
             }
         }
+
     }
 
     private int coorConvert(int row, int col) {
@@ -53,19 +61,22 @@ public class Percolation {
         }
         openCnt++;
         grid[row][col] = 1;
+        if (row == 0) {
+            topUf.union(coorConvert(row, col), topNode);
+        } else if (row == size - 1) {
+            bottomUf.union(coorConvert(row, col), bottomNode);
+        }
         for (int i = 0; i < dir.length; i++) {
             int r = row + dir[i][0];
             int c = col + dir[i][1];
             if (!isIndexOut(r, c) && isOpen(r, c)) {
-                uf.union(coorConvert(r, c), coorConvert(row, col));
+                topUf.union(coorConvert(r, c), coorConvert(row, col));
+                bottomUf.union(coorConvert(r, c), coorConvert(row, col));
             }
         }
-
-        for (int i = 0; i < size; i++) {
-            if (isFull(row, col) && uf.connected(coorConvert(row, col), coorConvert(size - 1, i))) {
-                isPercolate = true;
-                break;
-            }
+        int index = coorConvert(row, col);
+        if (topUf.connected(index, topNode) && bottomUf.connected(index, bottomNode)) {
+            isPercolate = true;
         }
     }
 
@@ -83,12 +94,8 @@ public class Percolation {
         if (!isOpen(row, col)) {
             return false;
         }
-        for (int i = 0; i < size; i++) {
-            if (uf.connected(coorConvert(row, col), coorConvert(0, i))) {
-                return true;
-            }
-        }
-        return false;
+
+        return topUf.connected(coorConvert(row, col), size * size);
     }
 
     public int numberOfOpenSites() {

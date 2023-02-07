@@ -16,7 +16,6 @@ public class PercolationStats {
         if (N <= 0 || N < 0) {
             throw new java.lang.IllegalArgumentException();
         }
-        pf = new PercolationFactory();
         double[] thresholds = new double[T];
         for (int i = 0; i < T; i++) {
             StdRandom.setSeed(SEED++);
@@ -61,7 +60,7 @@ public class PercolationStats {
 
     public static void main(String[] args) {
         PercolationFactory pf = new PercolationFactory();
-        PercolationStats pt = new PercolationStats(200, 10, pf);
+        PercolationStats pt = new PercolationStats(200, 100, pf);
         System.out.println(pt.mean + " " + pt.stddev + " " + pt.conHigh + " " + pt.conLow);
     }
 }
