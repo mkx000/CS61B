@@ -66,4 +66,9 @@ public class IntListTest {
         assertEquals(IntList.of(1, 2, 3), A);
     }
 
+    public static void main(String[] args) {
+        IntListTest test = new IntListTest();
+        test.testCatenate();
+        test.testDcatenate();
+    }
 }

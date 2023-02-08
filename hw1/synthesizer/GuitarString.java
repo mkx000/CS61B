@@ -41,16 +41,9 @@ public class GuitarString {
             while (!buffer.isEmpty()) {
                 buffer.dequeue();
             }
-            HashSet<Double> set = new HashSet<>();
             while (!buffer.isFull()) {
                 double noise = Math.random() - 0.5;
-                if (set.contains(noise)) {
-                    flag = true;
-                    break;
-                } else {
-                    set.add(noise);
-                    buffer.enqueue(noise);
-                }
+                buffer.enqueue(noise);
             }
         }
     }

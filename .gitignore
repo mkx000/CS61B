@@ -48,3 +48,10 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 *.lnk
+**/.idea
+**/out
+lab1-checkoff
+lab2*
+proj1a*
+
+

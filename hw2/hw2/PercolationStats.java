@@ -13,7 +13,7 @@ public class PercolationStats {
     private static int SEED = 10;
 
     public PercolationStats(int N, int T, PercolationFactory pf) throws java.lang.IllegalArgumentException {
-        if (N <= 0 || N < 0) {
+        if (N <= 0 || T < 0) {
             throw new java.lang.IllegalArgumentException();
         }
         double[] thresholds = new double[T];
