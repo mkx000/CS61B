@@ -215,9 +215,9 @@ public class ArrayHeap<T> implements ExtrinsicPQ<T> {
         double oldPriority = contents[index].myPriority;
         contents[index].myPriority = priority;
         if (oldPriority < priority){
-            swim(index);
-        } else {
             sink(index);
+        } else {
+            swim(index);
         }
         return;
     }
