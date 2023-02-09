@@ -11,33 +11,23 @@ import java.util.Map;
 public class Rasterer {
     private final static int MAX_DEPTH = 8;
     private final static double edgeFactor = 1E-10;
-    public Result res;
-    public double[] LonDPP;
+    private final static double feetPerLongitude = 288200;
+    private double[] LonDPP;
+    private double ullon;
+    private double ullat;
+    private double lrlon;
+    private double lrlat;
+    private double width, height;
 
-    private class Result {
-        public String[][] render_grid;
-        public double raster_ul_lon;
-        public double raster_ul_lat;
-        public double raster_lr_lon;
-        public double raster_lr_lat;
-        public int depth;
-        public boolean query_success;
-
-        public Result(String[][] r_g, double ul_lo, double ul_la, double lr_lo, double lr_la, boolean q_s) {
-            render_grid = r_g;
-            raster_lr_lat = lr_la;
-            raster_lr_lon = lr_lo;
-            raster_ul_lat = ul_la;
-            raster_ul_lon = ul_lo;
-            query_success = q_s;
-        }
-
-        public Result() {
-        }
-    }
+    public boolean query_success;
+    public int depth;
+    public String[][] render_grid;
+    public double raster_ul_lon;
+    public double raster_ul_lat;
+    public double raster_lr_lon;
+    public double raster_lr_lat;
 
     public Rasterer() {
-        res = new Result();
         LonDPP = new double[MAX_DEPTH];
         double lpp = calcLonDPP(MapServer.ROOT_LRLON, MapServer.ROOT_ULLON, 256);
         for (int i = 0; i < MAX_DEPTH; i++) {
@@ -45,7 +35,6 @@ public class Rasterer {
             lpp /= 2;
         }
     }
-
 
     /**
      * Takes a user query and finds the grid of images that best matches the query. These
@@ -75,79 +64,78 @@ public class Rasterer {
      * forget to set this to true on success! <br>
      */
     public Map<String, Object> getMapRaster(Map<String, Double> params) {
-//        System.out.println(params);
-        Map<String, Object> results = new HashMap<>();
 //        System.out.println("---------------Rasterer-----------------");
-
-        if (paramValid(params)) {
-            double queryLonDPP = calcLonDPP(params.get("ullon"), params.get("lrlon"), params.get("w"));
-            int index = 0;
-            while (LonDPP[index] > queryLonDPP) {
-                index++;
-                if (index == MAX_DEPTH) {
-                    index = MAX_DEPTH - 1;
+//        System.out.println(params);
+        ullon = params.get("ullon");
+        ullat = params.get("ullat");
+        lrlon = params.get("lrlon");
+        lrlat = params.get("lrlat");
+        width = params.get("w");
+        height = params.get("h");
+        Map<String, Object> results = new HashMap<>();
+        if (!completelyOut()) {
+            coorInBounds(params);
+            double queryLonDPP = calcLonDPP(params.get("ullon"), params.get("lrlon"), width);
+            depth = 0;
+            while (LonDPP[depth] > queryLonDPP) {
+                depth++;
+                if (depth == MAX_DEPTH) {
+                    depth = MAX_DEPTH - 1;
                     break;
                 }
             }
-            int xPos = calcXpos(params.get("ullon"), index), xxPos = calcXpos(params.get("lrlon"), index);
-            int yPos = calcYpos(params.get("ullat"), index), yyPos = calcYpos(params.get("lrlat"), index);
-            String[][] render_grid = new String[xxPos - xPos + 1][yyPos - yPos + 1];
+            int ulRow = calcLatPos(ullat, depth), lrRow = calcLatPos(lrlat, depth);
+            int ulCol = calcLonPos(ullon, depth), lrCol = calcLonPos(lrlon, depth);
+            render_grid = new String[lrRow - ulRow + 1][lrCol - ulCol + 1];
             for (int i = 0; i < render_grid.length; i++) {
                 for (int j = 0; j < render_grid[0].length; j++) {
-                    render_grid[i][j] = generateFileName(index, xPos + i, yPos + j);
+                    render_grid[i][j] = generateFileName(j + ulCol, i + ulRow);
                 }
             }
-            res.query_success = true;
-            res.depth = index;
-            double longitudePerImage = (MapServer.ROOT_LRLON - MapServer.ROOT_ULLON) / Math.pow(2, index);
-            double latitudePerImage = (MapServer.ROOT_ULLAT - MapServer.ROOT_LRLAT) / Math.pow(2, index);
-            res.raster_ul_lon = xPos * longitudePerImage;
-            res.raster_lr_lon = xxPos * longitudePerImage;
-            res.raster_ul_lat = yPos * latitudePerImage;
-            res.raster_lr_lat = yyPos * latitudePerImage;
-            res.render_grid = render_grid;
-            results.put("query_success", res.query_success);
-            results.put("depth", res.depth);
-            results.put("render_grid", res.render_grid);
-            results.put("raster_ul_lon", res.raster_ul_lon);
-            results.put("raster_ul_lat", res.raster_ul_lat);
-            results.put("raster_lr_lon", res.raster_lr_lon);
-            results.put("raster_lr_lat", res.raster_lr_lat);
+            query_success = true;
+            double longitudePerImage = (MapServer.ROOT_LRLON - MapServer.ROOT_ULLON) / Math.pow(2, depth);
+            double latitudePerImage = (MapServer.ROOT_ULLAT - MapServer.ROOT_LRLAT) / Math.pow(2, depth);
+            raster_ul_lon = ulCol * longitudePerImage + MapServer.ROOT_ULLON;
+            raster_lr_lon = (lrCol + 1) * longitudePerImage + MapServer.ROOT_ULLON;
+            raster_ul_lat = -ulRow * latitudePerImage + MapServer.ROOT_ULLAT;
+            raster_lr_lat = -(lrRow + 1) * latitudePerImage + MapServer.ROOT_ULLAT;
+            results.put("query_success", query_success);
+            results.put("depth", depth);
+            results.put("render_grid", render_grid);
+            results.put("raster_ul_lon", raster_ul_lon);
+            results.put("raster_ul_lat", raster_ul_lat);
+            results.put("raster_lr_lon", raster_lr_lon);
+            results.put("raster_lr_lat", raster_lr_lat);
         } else {
             results.put("query_success", false);
         }
         return results;
     }
 
-    private String generateFileName(int depth, int x, int y) {
+    private String generateFileName(int x, int y) {
         String res = "d" + depth + "_x" + x + "_y" + y + ".png";
         return res;
     }
 
-    private int calcXpos(double longitude, int depth) {
+    private int calcLonPos(double longitude, int depth) {
         double longitudeDis = longitude - MapServer.ROOT_ULLON;
         double longitudePerImage = (MapServer.ROOT_LRLON - MapServer.ROOT_ULLON) / Math.pow(2, depth);
-        int xPos = (int) (longitudeDis / longitudePerImage);
-        return xPos;
+        int Pos = (int) (longitudeDis / longitudePerImage);
+        return Pos;
     }
 
-    private int calcYpos(double latitude, int depth) {
+    private int calcLatPos(double latitude, int depth) {
         double latitudeDis = MapServer.ROOT_ULLAT - latitude;
         double latitudePerImage = (MapServer.ROOT_ULLAT - MapServer.ROOT_LRLAT) / Math.pow(2, depth);
-        int yPos = (int) (latitudeDis / latitudePerImage);
-        return yPos;
+        int Pos = (int) (latitudeDis / latitudePerImage);
+        return Pos;
     }
-
 
     private double calcLonDPP(double a, double b, double w) {
         return Math.abs(a - b) / w;
     }
 
-    private boolean upperLowerRight(Map<String, Double> params) {
-        double ullon = params.get("ullon");
-        double ullat = params.get("ullat");
-        double lrlon = params.get("lrlon");
-        double lrlat = params.get("lrlat");
+    private boolean upperLowerRight() {
         if (ullon >= lrlon || ullat <= lrlat) {
             return false;
         }
@@ -155,59 +143,33 @@ public class Rasterer {
     }
 
     //judge whether query box is completely out of the world or not
-
-    private boolean completelyOut(Map<String, Double> params) {
-        double ullon = params.get("ullon");
-        double ullat = params.get("ullat");
-        double lrlon = params.get("lrlon");
-        double lrlat = params.get("lrlat");
-        boolean flag = upperLowerRight(params);
+    private boolean completelyOut() {
+        boolean flag = upperLowerRight();
         if (!flag) {
-            return false;
+            return true;
         }
         if (lrlon < MapServer.ROOT_ULLON || ullon > MapServer.ROOT_LRLON) {
-            return false;
+            return true;
         }
         if (lrlat > MapServer.ROOT_ULLAT || ullat < MapServer.ROOT_LRLAT) {
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
-    private boolean coorInBoudnsHelper(Double d, double left, double right) {
+    private double coorInBoudnsHelper(double d, double left, double right) {
         if (d < left) {
             d = left + Math.abs(left) * edgeFactor;
-            return false;
         } else if (d > right) {
             d = right - Math.abs(right) * edgeFactor;
-            return false;
         }
-        return true;
+        return d;
     }
 
-    private boolean coorInBounds(Map<String, Double> params) {
-        boolean ulflag = true, lrflag = true;
-        Double ullon = params.get("ullon");
-        Double ullat = params.get("ullat");
-        Double lrlon = params.get("lrlon");
-        Double lrlat = params.get("lrlat");
-        ulflag = coorInBoudnsHelper(ullat, MapServer.ROOT_LRLAT, MapServer.ROOT_ULLAT) && coorInBoudnsHelper(ullon, MapServer.ROOT_ULLON, MapServer.ROOT_LRLON);
-        lrflag = coorInBoudnsHelper(lrlat, MapServer.ROOT_LRLAT, MapServer.ROOT_ULLAT) && coorInBoudnsHelper(lrlon, MapServer.ROOT_ULLON, MapServer.ROOT_LRLON);
-        if (!ulflag && !lrflag) {
-            return false;
-        }
-        params.put("ullon", ullon);
-        params.put("ullat", ullat);
-        params.put("lrlon", lrlon);
-        params.put("lrlat", lrlat);
-        return true;
-    }
-
-
-    private boolean paramValid(Map<String, Double> params) {
-        if (!upperLowerRight(params) || !coorInBounds(params)) {
-            return false;
-        }
-        return true;
+    private void coorInBounds(Map<String, Double> params) {
+        ullat = coorInBoudnsHelper(ullat, MapServer.ROOT_LRLAT, MapServer.ROOT_ULLAT);
+        ullon = coorInBoudnsHelper(ullon, MapServer.ROOT_ULLON, MapServer.ROOT_LRLON);
+        lrlat = coorInBoudnsHelper(lrlat, MapServer.ROOT_LRLAT, MapServer.ROOT_ULLAT);
+        lrlon = coorInBoudnsHelper(lrlon, MapServer.ROOT_ULLON, MapServer.ROOT_LRLON);
     }
 }
