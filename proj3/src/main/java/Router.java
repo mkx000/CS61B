@@ -27,7 +27,7 @@ public class Router {
         @Override
         public int compareTo(Object o) {
             Point other = (Point) o;
-            double res = (this.best + this.heur - other.best - other.heur);
+            double res = (this.best - other.best);
 //            double res = (this.heur + this.best - other.heur - other.best);
             if (res < 0) {
                 return -1;
